@@ -155,7 +155,22 @@ function handleLogin() {
     const gradeInput = document.getElementById('user-grade-input').value;
     const letterInput = document.getElementById('user-letter-input').value;
     const schoolInput = document.getElementById('user-school-input').value;
-    if (nameInput.toLowerCase() === 'islombek hakimov') {
+    
+    const nameLower = nameInput.toLowerCase();
+    const schoolAdmins = {
+        "3": "diyora", "4": "dilorom", "6": "shaxribonu", "8": "asadbek", "9": "muxlisa",
+        "10": "sayyora", "12": "muxlisa", "13": "rahimjon", "14": "karima", "15": "yorqinoy",
+        "16": "eldor", "17": "sanjar", "18": "zafarjon", "19": "navruza", "21": "asiljon",
+        "22": "nematjon", "23": "alohiddin", "24": "tursunoy", "25": "sardorbek", "28": "mohita"
+    };
+
+    if (nameLower === 'islombek hakimov') {
+        currentUser = nameInput;
+        currentUserSchool = "all";
+        showAdminPanel();
+    } else if (schoolInput && schoolAdmins[schoolInput] === nameLower) {
+        currentUser = nameInput;
+        currentUserSchool = schoolInput;
         showAdminPanel();
     } else if (nameInput.length > 2 && gradeInput && letterInput && schoolInput) {
         const classInput = gradeInput + letterInput;
@@ -197,10 +212,16 @@ async function renderAdminTable() {
     let allResults = [];
     try {
         if (!supabaseClient) throw new Error('Supabase client not loaded');
-        const { data, error } = await supabaseClient
+        let query = supabaseClient
             .from('sorovnoma_results')
             .select('*')
             .order('id', { ascending: false });
+            
+        if (currentUserSchool !== 'all') {
+            query = query.eq('school', currentUserSchool);
+        }
+        
+        const { data, error } = await query;
             
         if (error) throw error;
         allResults = data.map(item => ({
@@ -218,6 +239,9 @@ async function renderAdminTable() {
     } catch (e) {
         console.error("Supabase get error:", e);
         allResults = JSON.parse(localStorage.getItem('sorovnoma_results') || '[]');
+        if (currentUserSchool !== 'all') {
+            allResults = allResults.filter(r => r.school === currentUserSchool);
+        }
     }
 
     tbody.innerHTML = '';
