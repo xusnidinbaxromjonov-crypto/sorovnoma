@@ -261,6 +261,13 @@ async function renderAdminTable() {
     
     // Filter
     let results = allResults;
+    if (currentUserSchool === "all") {
+        const filterVal = document.getElementById("admin-school-filter").value;
+        if (filterVal !== "all") {
+            results = results.filter(r => String(r.school) === filterVal);
+        }
+    }
+
     if (currentAdminFilter !== 'all') {
         results = results.filter(r => r.testName.includes(currentAdminFilter));
     }
