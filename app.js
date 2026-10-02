@@ -7,7 +7,6 @@ let currentTest = null;
 let userAnswers = {};
 let currentUser = "";
 let currentUserClass = "";
-    currentUserSchool = "";
 let currentUserSchool = "";
 let modalConfirmCallback = null;
 let testStartTime = null;
@@ -153,7 +152,8 @@ function showScreen(id) {
 
 function handleLogin() {
     const nameInput = document.getElementById('user-name-input').value.trim();
-    const classInput = document.getElementById('user-class-input').value;
+    const gradeInput = document.getElementById('user-grade-input').value;
+    const letterInput = document.getElementById('user-letter-input').value;
     const schoolInput = document.getElementById('user-school-input').value;
     if (nameInput.toLowerCase() === 'islombek hakimov') {
         showAdminPanel();
@@ -361,7 +361,9 @@ function showHome() {
     currentUserSchool = "";
     document.getElementById('user-name-input').value = "";
     document.getElementById('user-school-input').value = "";
-    document.getElementById('user-class-input').value = "";
+    document.getElementById('user-grade-input').value = "";
+    document.getElementById('user-letter-input').innerHTML = '<option value="" disabled selected>Harfni tanlang</option>';
+    document.getElementById('letter-container').style.display = 'none';
     showScreen('screen-login');
 }
 
