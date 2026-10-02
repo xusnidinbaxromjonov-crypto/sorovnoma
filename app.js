@@ -238,6 +238,7 @@ async function renderAdminTable() {
         localStorage.setItem('sorovnoma_results', JSON.stringify(allResults));
     } catch (e) {
         console.error("Supabase get error:", e);
+        alert("Baza bilan bog'lanishda xato: " + e.message + "\n(Ma'lumotlar faqat shu qurilma xotirasidan o'qilmoqda!)");
         allResults = JSON.parse(localStorage.getItem('sorovnoma_results') || '[]');
         if (currentUserSchool !== 'all') {
             allResults = allResults.filter(r => r.school === currentUserSchool);
@@ -954,7 +955,10 @@ async function saveResult(summary) {
     localStorage.setItem('sorovnoma_results', JSON.stringify(allResults));
 
     try {
-        if (!supabaseClient) throw new Error('Supabase client not loaded');
+        if (!supabaseClient) {
+            alert("Supabase ulanmagan! Natija faqat shu qurilma xotirasida saqlandi.");
+            return;
+        }
         const { error } = await supabaseClient
             .from('sorovnoma_results')
             .insert([
@@ -970,8 +974,12 @@ async function saveResult(summary) {
                     answers: data.answers
                 }
             ]);
-        if (error) console.error("Supabase insert error:", error);
+        if (error) {
+            console.error("Supabase insert error:", error);
+            alert("Bazaga yozishda xato: " + error.message + " (Natija faqat telefonda saqlandi)");
+        }
     } catch (e) {
         console.error("Supabase exception:", e);
+        alert("Bazaga bog'lanishda xato: " + e.message);
     }
 }
