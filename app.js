@@ -1,6 +1,6 @@
 const supabaseUrl = 'https://vxxzlmovxctlwmextipy.supabase.co';
 const supabaseKey = 'sb_publishable_FwxP81L7WF4H5qXB8yCPDg_7Lam2oJX';
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
 
 let currentLang = 'uz';
 let currentTest = null;
@@ -48,6 +48,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Login & Admin
     document.getElementById('btn-login').addEventListener('click', handleLogin);
+
+    const gradeInputEl = document.getElementById('user-grade-input');
+    if (gradeInputEl) {
+        gradeInputEl.addEventListener('change', (e) => {
+            const grade = e.target.value;
+            const letterSelect = document.getElementById('user-letter-input');
+            const container = document.getElementById('letter-container');
+            letterSelect.innerHTML = '<option value="" disabled selected>Harfni tanlang</option>';
+            
+            let letters = [];
+            if (grade === '5') letters = ['A', 'B', 'V', 'G', 'D', 'E', 'J', 'Z'];
+            else if (grade === '6') letters = ['A', 'B', 'V', 'G', 'D'];
+            else if (grade === '7') letters = ['A', 'B', 'D', 'E', 'G', 'V'];
+            else if (grade === '8') letters = ['A', 'B', 'D', 'E', 'G', 'V'];
+            else if (grade === '9') letters = ['A', 'B', 'D', 'G', 'V'];
+            
+            letters.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = l;
+                opt.textContent = `"${l}" - sinfi`;
+                letterSelect.appendChild(opt);
+            });
+            
+            container.style.display = 'block';
+        });
+    }
+
     document.getElementById('btn-admin-logout').addEventListener('click', () => {
         currentUser = "";
         document.getElementById('user-name-input').value = "";
@@ -169,6 +196,7 @@ async function renderAdminTable() {
     
     let allResults = [];
     try {
+        if (!supabaseClient) throw new Error('Supabase client not loaded');
         const { data, error } = await supabaseClient
             .from('sorovnoma_results')
             .select('*')
@@ -896,6 +924,7 @@ async function saveResult(summary) {
     localStorage.setItem('sorovnoma_results', JSON.stringify(allResults));
 
     try {
+        if (!supabaseClient) throw new Error('Supabase client not loaded');
         const { error } = await supabaseClient
             .from('sorovnoma_results')
             .insert([
