@@ -1,3 +1,7 @@
+const supabaseUrl = 'https://vxxzlmovxctlwmextipy.supabase.co';
+const supabaseKey = 'sb_publishable_FwxP81L7WF4H5qXB8yCPDg_7Lam2oJX';
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 let currentLang = 'uz';
 let currentTest = null;
 let userAnswers = {};
@@ -154,10 +158,35 @@ function showAdminPanel() {
     showScreen('screen-admin');
 }
 
-function renderAdminTable() {
+async function renderAdminTable() {
     const tbody = document.getElementById('admin-table-body');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">Yuklanmoqda...</td></tr>';
+    
+    let allResults = [];
+    try {
+        const { data, error } = await supabaseClient
+            .from('sorovnoma_results')
+            .select('*')
+            .order('id', { ascending: false });
+            
+        if (error) throw error;
+        allResults = data.map(item => ({
+            name: item.name,
+            className: item.class_name,
+            testName: item.test_name,
+            date: item.date,
+            startTime: item.start_time,
+            endTime: item.end_time,
+            summary: item.summary,
+            answers: item.answers
+        }));
+        localStorage.setItem('sorovnoma_results', JSON.stringify(allResults));
+    } catch (e) {
+        console.error("Supabase get error:", e);
+        allResults = JSON.parse(localStorage.getItem('sorovnoma_results') || '[]');
+    }
+
     tbody.innerHTML = '';
-    const allResults = JSON.parse(localStorage.getItem('sorovnoma_results') || '[]');
     const query = document.getElementById('admin-search').value.toLowerCase();
     
     // Stats calculation
@@ -802,7 +831,7 @@ function calculateResults() {
     showScreen('screen-results');
 }
 
-function saveResult(summary) {
+async function saveResult(summary) {
     if(!currentUser) return;
     const test = testsData[currentTest];
     const endTime = new Date();
@@ -855,4 +884,24 @@ function saveResult(summary) {
     let allResults = JSON.parse(localStorage.getItem('sorovnoma_results') || '[]');
     allResults.push(data);
     localStorage.setItem('sorovnoma_results', JSON.stringify(allResults));
+
+    try {
+        const { error } = await supabaseClient
+            .from('sorovnoma_results')
+            .insert([
+                {
+                    name: data.name,
+                    class_name: data.className,
+                    test_name: data.testName,
+                    date: data.date,
+                    start_time: data.startTime,
+                    end_time: data.endTime,
+                    summary: data.summary,
+                    answers: data.answers
+                }
+            ]);
+        if (error) console.error("Supabase insert error:", error);
+    } catch (e) {
+        console.error("Supabase exception:", e);
+    }
 }
