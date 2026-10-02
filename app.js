@@ -10,7 +10,7 @@ let currentUserClass = "";
 let currentUserSchool = "";
 let modalConfirmCallback = null;
 let testStartTime = null;
-let currentAdminFilter = 'none';
+let currentAdminFilter = 'all';
 
 function showModal(message, isConfirm = false, onConfirm = null) {
     const overlay = document.getElementById('custom-modal');
@@ -261,15 +261,12 @@ async function renderAdminTable() {
     
     // Filter
     let results = allResults;
-    if (currentAdminFilter === 'none') {
-        if (!query) results = []; // Empty if no filter and no search
-    } else if (currentAdminFilter !== 'all') {
+    if (currentAdminFilter !== 'all') {
         results = results.filter(r => r.testName.includes(currentAdminFilter));
     }
     
     if (query) {
-        let baseResults = currentAdminFilter === 'none' ? allResults : results;
-        results = baseResults.filter(r => r.name.toLowerCase().includes(query) || r.testName.toLowerCase().includes(query) || (r.className && r.className.toLowerCase().includes(query)));
+        results = results.filter(r => r.name.toLowerCase().includes(query) || r.testName.toLowerCase().includes(query) || (r.className && r.className.toLowerCase().includes(query)));
     }
     
     window.currentFilteredResults = results;
