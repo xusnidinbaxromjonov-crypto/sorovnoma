@@ -7,6 +7,8 @@ let currentTest = null;
 let userAnswers = {};
 let currentUser = "";
 let currentUserClass = "";
+    currentUserSchool = "";
+let currentUserSchool = "";
 let modalConfirmCallback = null;
 let testStartTime = null;
 let currentAdminFilter = 'none';
@@ -124,12 +126,14 @@ function showScreen(id) {
 
 function handleLogin() {
     const nameInput = document.getElementById('user-name-input').value.trim();
-    const classInput = document.getElementById('user-class-input').value.trim();
+    const classInput = document.getElementById('user-class-input').value;
+    const schoolInput = document.getElementById('user-school-input').value;
     if (nameInput.toLowerCase() === 'islombek hakimov') {
         showAdminPanel();
-    } else if (nameInput.length > 2 && classInput.length > 0) {
+    } else if (nameInput.length > 2 && classInput && schoolInput) {
         currentUser = nameInput;
         currentUserClass = classInput;
+        currentUserSchool = schoolInput;
         
         // Auto-detect test based on class
         let targetTest = null;
@@ -149,7 +153,7 @@ function handleLogin() {
             showModal(currentLang === 'uz' ? "Sinfingiz xato kiritildi! (Faqat 5, 6, 7, 8 yoki 9-sinflar uchun)" : "Класс введен неверно! (Только для 5, 6, 7, 8 или 9 классов)");
         }
     } else {
-        showModal(currentLang === 'uz' ? "Iltimos, ism familiya va sinfingizni to'liq kiriting!" : "Пожалуйста, введите ваше имя и класс полностью!");
+        showModal(currentLang === 'uz' ? "Iltimos, ism, maktab va sinfingizni to'liq kiriting!" : "Пожалуйста, введите ваше имя, школу и класс полностью!");
     }
 }
 
@@ -172,6 +176,7 @@ async function renderAdminTable() {
         if (error) throw error;
         allResults = data.map(item => ({
             name: item.name,
+            school: item.school,
             className: item.class_name,
             testName: item.test_name,
             date: item.date,
@@ -231,7 +236,7 @@ async function renderAdminTable() {
         
         tr.innerHTML = `
             <td>${index + 1}</td>
-            <td style="font-weight: 600; color: #0f172a;">${res.name} <span style="color: #64748b; font-size: 0.85em;">(${res.className || '-'})</span></td>
+            <td style="font-weight: 600; color: #0f172a;">${res.name} <span style="color: #64748b; font-size: 0.85em;">(${res.school ? res.school + '-maktab, ' : ''}${res.className || '-'})</span></td>
             <td>-</td>
             <td><span class="badge ${badgeClass}">${res.testName}</span></td>
             <td style="font-size: 0.9rem;">${res.startTime || res.date}</td>
@@ -256,7 +261,7 @@ window.viewAnswers = function(index) {
             <h2 style="text-align: center; margin-bottom: 20px; color: #0f172a;">O'quvchi Natijasi</h2>
             <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
                 <p style="margin-bottom: 8px;"><strong>Ism Familiya:</strong> ${res.name}</p>
-                <p style="margin-bottom: 8px;"><strong>Sinf:</strong> ${res.className || '-'}</p>
+                <p style="margin-bottom: 8px;"><strong>Maktab va Sinf:</strong> ${res.school ? res.school + '-maktab, ' : ''}${res.className || '-'}</p>
                 <p style="margin-bottom: 8px;"><strong>Test Turi:</strong> ${res.testName}</p>
                 <p style="margin-bottom: 8px;"><strong>Sana va Vaqt:</strong> ${res.date} (${res.startTime} - ${res.endTime})</p>
                 <p style="margin-bottom: 8px;"><strong>Xulosa:</strong> ${res.summary}</p>
@@ -295,10 +300,11 @@ function exportToCSV() {
     }
     
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-    csvContent += "Ism Familiya,Sinf,Test Turi,Boshladi,Tugatdi,Xulosa,Javoblar\n";
+    csvContent += "Ism Familiya,Maktab,Sinf,Test Turi,Boshladi,Tugatdi,Xulosa,Javoblar\n";
     
     results.forEach(res => {
         const name = `"${res.name.replace(/"/g, '""')}"`;
+        const school = `"${(res.school || '').replace(/"/g, '""')}"`;
         const cls = `"${(res.className || '').replace(/"/g, '""')}"`;
         const testName = `"${res.testName.replace(/"/g, '""')}"`;
         const start = `"${res.startTime || res.date}"`;
@@ -306,7 +312,7 @@ function exportToCSV() {
         const summary = `"${res.summary.replace(/"/g, '""')}"`;
         const ans = `"${(res.answers || []).map(a => a.q + ': ' + a.a).join(' | ').replace(/"/g, '""')}"`;
         
-        csvContent += `${name},${cls},${testName},${start},${end},${summary},${ans}\n`;
+        csvContent += `${name},${school},${cls},${testName},${start},${end},${summary},${ans}\n`;
     });
     
     const encodedUri = encodeURI(csvContent);
@@ -323,7 +329,9 @@ function showHome() {
     userAnswers = {};
     currentUser = "";
     currentUserClass = "";
+    currentUserSchool = "";
     document.getElementById('user-name-input').value = "";
+    document.getElementById('user-school-input').value = "";
     document.getElementById('user-class-input').value = "";
     showScreen('screen-login');
 }
@@ -872,6 +880,7 @@ async function saveResult(summary) {
 
     const data = {
         name: currentUser,
+        school: currentUserSchool,
         className: currentUserClass,
         testName: test.title[currentLang],
         date: endTime.toLocaleDateString(),
@@ -891,6 +900,7 @@ async function saveResult(summary) {
             .insert([
                 {
                     name: data.name,
+                    school: data.school,
                     class_name: data.className,
                     test_name: data.testName,
                     date: data.date,
