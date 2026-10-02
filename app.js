@@ -130,7 +130,8 @@ function handleLogin() {
     const schoolInput = document.getElementById('user-school-input').value;
     if (nameInput.toLowerCase() === 'islombek hakimov') {
         showAdminPanel();
-    } else if (nameInput.length > 2 && classInput && schoolInput) {
+    } else if (nameInput.length > 2 && gradeInput && letterInput && schoolInput) {
+        const classInput = gradeInput + letterInput;
         currentUser = nameInput;
         currentUserClass = classInput;
         currentUserSchool = schoolInput;
