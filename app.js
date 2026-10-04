@@ -164,13 +164,21 @@ function handleLogin() {
         "22": "nematjon", "23": "alohiddin", "24": "tursunoy", "25": "sardorbek", "28": "mohita"
     };
 
+    let matchedSchool = null;
+    for (const [school, adminName] of Object.entries(schoolAdmins)) {
+        if (adminName === nameLower) {
+            matchedSchool = school;
+            break;
+        }
+    }
+
     if (nameLower === 'islombek hakimov') {
         currentUser = nameInput;
         currentUserSchool = "all";
         showAdminPanel();
-    } else if (schoolInput && schoolAdmins[schoolInput] === nameLower) {
+    } else if (matchedSchool) {
         currentUser = nameInput;
-        currentUserSchool = schoolInput;
+        currentUserSchool = matchedSchool;
         showAdminPanel();
     } else if (nameInput.length > 2 && gradeInput && letterInput && schoolInput) {
         const classInput = gradeInput + letterInput;
