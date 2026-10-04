@@ -158,7 +158,7 @@ function handleLogin() {
     
     const nameLower = nameInput.toLowerCase();
     const schoolAdmins = {
-        "3": "diyora", "4": "dilorom", "6": "shaxribonu", "8": "asadbek", "9": "muxlisa",
+        "3": "diyora", "4": "dilorom", "5": "salom", "6": "shaxribonu", "8": "asadbek", "9": "muxlisa",
         "10": "sayyora", "12": "muxlisa", "13": "rahimjon", "14": "karima", "15": "yorqinoy",
         "16": "eldor", "17": "sanjar", "18": "zafarjon", "19": "navruza", "21": "asiljon",
         "22": "nematjon", "23": "alohiddin", "24": "tursunoy", "25": "sardorbek", "28": "mohita"
